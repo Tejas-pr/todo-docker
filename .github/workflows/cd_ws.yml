@@ -1,8 +1,8 @@
 name: Deploy the ws
 on:
   push:
-    branches: [ master ]
-jobs: 
+    branches: [master]
+jobs:
   build:
     runs-on: ubuntu-latest
     steps:
@@ -14,11 +14,16 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      
-      - name: Build and push 
+
+      - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./docker/Dockerfile.ws
           push: true
           tags: tejaspr/todo-app-ws:${{ github.sha }}
+      - name: Deploy to the VM
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" &> ~/ssh_key
+          chmod 700 /home/runner/ssh_key
+          ssh -o StrictHostKeyChecking=no -i ~/ssh_key root@18.233.98.250 -t "docker stop user_backend && docker run --name user_backend -d -p 8080:8080 100xdevs/todo-app-backend:${{ github.sha }}"
