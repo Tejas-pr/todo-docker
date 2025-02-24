@@ -5,6 +5,10 @@ const app = express();
 
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.json({ message: "im running" });
+})
+
 app.get("/users", (req, res) => {
   prismaClient.user.findMany()
     .then(users => {
@@ -37,4 +41,6 @@ app.post("/user", (req, res) => {
     });
 })
 
-app.listen(8080);
+app.listen(8080, () => {
+  console.log("Listening on port 8080");
+});
